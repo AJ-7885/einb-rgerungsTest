@@ -54,38 +54,13 @@ export const GlossaryModal: React.FC<GlossaryModalProps> = ({
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            {onChangeTranslationMode && (
-              <div className="hidden sm:flex items-center gap-1 p-0.5 bg-slate-200/70 dark:bg-slate-800 rounded-lg text-[11px] font-semibold">
-                {(
-                  [
-                    { id: 'none', label: 'Nur DE' },
-                    { id: 'both', label: 'EN+فا' },
-                    { id: 'en', label: 'EN' },
-                    { id: 'fa', label: 'فارسی' },
-                  ] as const
-                ).map(opt => (
-                  <button
-                    key={opt.id}
-                    onClick={() => onChangeTranslationMode(opt.id)}
-                    className={`px-2 py-1 rounded-md transition ${
-                      translationMode === opt.id
-                        ? 'bg-amber-500 text-slate-950 font-bold shadow-xs'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            )}
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800 transition"
+            aria-label="Lexikon schließen"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Search & Category Filter */}
