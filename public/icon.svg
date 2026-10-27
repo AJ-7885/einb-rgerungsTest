@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24" />
+      <stop offset="100%" stop-color="#d97706" />
+    </linearGradient>
+    <linearGradient id="redGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444" />
+      <stop offset="100%" stop-color="#b91c1c" />
+    </linearGradient>
+  </defs>
+  <!-- Background Rounded Shield -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4" />
+  
+  <!-- German Flag Tri-band Accent Ribbons -->
+  <g transform="translate(136, 110)">
+    <rect x="0" y="0" width="240" height="20" rx="10" fill="#18181b" stroke="#3f3f46" stroke-width="2" />
+    <rect x="0" y="24" width="240" height="20" rx="10" fill="url(#redGrad)" />
+    <rect x="0" y="48" width="240" height="20" rx="10" fill="url(#goldGrad)" />
+  </g>
+
+  <!-- Central Eagle / Seal Silhouette -->
+  <g transform="translate(256, 300) scale(1.15)">
+    <!-- Book Base (Grundgesetz) -->
+    <path d="M-90,60 C-45,45 -10,50 0,65 C10,50 45,45 90,60 L90,10 C45,-5 10,0 0,15 C-10,0 -45,-5 -90,10 Z" fill="#334155" />
+    <path d="M-90,52 C-45,37 -10,42 0,57 C10,42 45,37 90,52 L90,2 C45,-13 10,-8 0,7 C-10,-8 -45,-13 -90,2 Z" fill="#f8fafc" />
+    
+    <!-- Stylized Federal Eagle Shape -->
+    <path d="M0,-85 C-12,-85 -20,-75 -24,-60 C-36,-58 -46,-45 -54,-30 C-62,-15 -66,5 -70,25 C-62,20 -50,18 -40,18 C-35,18 -30,22 -26,28 C-20,20 -12,10 0,6 C12,10 20,20 26,28 C30,22 35,18 40,18 C50,18 62,20 70,25 C66,5 62,-15 54,-30 C46,-45 36,-58 24,-60 C20,-75 12,-85 0,-85 Z" fill="url(#goldGrad)" />
+    <!-- Wing Feathers -->
+    <path d="M-60,-20 C-75,5 -85,35 -85,60 C-70,55 -55,50 -45,50 C-48,35 -52,10 -40,-10 Z" fill="#fbbf24" opacity="0.9" />
+    <path d="M60,-20 C75,5 85,35 85,60 C70,55 55,50 45,50 C48,35 52,10 40,-10 Z" fill="#fbbf24" opacity="0.9" />
+    <!-- Crown / Stars -->
+    <circle cx="0" cy="-105" r="7" fill="#fbbf24" />
+    <circle cx="-25" cy="-98" r="5.5" fill="#fbbf24" />
+    <circle cx="25" cy="-98" r="5.5" fill="#fbbf24" />
+  </g>
+</svg>
