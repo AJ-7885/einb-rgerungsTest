@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { useProgress } from './hooks/useProgress';
 import { OFFICIAL_QUESTIONS } from './data/questions';
 import { GERMAN_STATES } from './data/states';
 import { Navbar, NavTab } from './components/Navbar';
 import { QuestionExplorer, FilterType } from './components/QuestionExplorer';
-import { ExamSimulator } from './components/ExamSimulator';
-import { ThreeDVisualizer } from './components/ThreeDVisualizer';
-import { GlossaryModal } from './components/GlossaryModal';
-import { StatisticsModal } from './components/StatisticsModal';
-import { VoiceSettingsModal } from './components/VoiceSettingsModal';
 import { StatePickerModal } from './components/StatePickerModal';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import {
@@ -22,7 +17,24 @@ import {
   ArrowRight,
   BarChart3,
   ListChecks,
+  Image as ImageIcon,
 } from 'lucide-react';
+
+const ExamSimulator = lazy(() =>
+  import('./components/ExamSimulator').then(m => ({ default: m.ExamSimulator }))
+);
+const ThreeDVisualizer = lazy(() =>
+  import('./components/ThreeDVisualizer').then(m => ({ default: m.ThreeDVisualizer }))
+);
+const GlossaryModal = lazy(() =>
+  import('./components/GlossaryModal').then(m => ({ default: m.GlossaryModal }))
+);
+const StatisticsModal = lazy(() =>
+  import('./components/StatisticsModal').then(m => ({ default: m.StatisticsModal }))
+);
+const VoiceSettingsModal = lazy(() =>
+  import('./components/VoiceSettingsModal').then(m => ({ default: m.VoiceSettingsModal }))
+);
 
 export default function App() {
   const {
@@ -221,8 +233,25 @@ export default function App() {
             {/* Secondary Quick-Access Tools */}
             <section
               aria-label="Schnellzugriff"
-              className="grid grid-cols-2 sm:grid-cols-4 gap-3"
+              className="grid grid-cols-2 sm:grid-cols-5 gap-3"
             >
+              <button
+                type="button"
+                onClick={() => handleOpenQuestionsWithFilter('images')}
+                className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-500/60 text-left transition space-y-1.5"
+              >
+                <div className="flex items-center justify-between">
+                  <ImageIcon className="w-4 h-4 text-amber-500" />
+                  <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
+                    {prefs.selectedStateCode === 'ALL' ? 43 : 13}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-slate-900 dark:text-white">Bildfragen</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Wappen, Karten & Fotos
+                </p>
+              </button>
+
               <button
                 type="button"
                 onClick={() => handleOpenQuestionsWithFilter('wrong')}
@@ -332,17 +361,25 @@ export default function App() {
         {/* VIEW 3: Exam Simulator ('simulator') */}
         {activeTab === 'simulator' && (
           <div className="animate-in fade-in duration-150">
-            <ExamSimulator
-              allQuestions={OFFICIAL_QUESTIONS}
-              selectedStateCode={prefs.selectedStateCode}
-              onFinishExam={recordExamSession}
-              bookmarkedIds={stats.bookmarkedIds}
-              onToggleBookmark={toggleBookmark}
-              speechRate={prefs.speechRate}
-              translationMode={prefs.translationMode}
-              customQuestionIds={customPracticeIds || undefined}
-              onClearCustomQuestions={() => setCustomPracticeIds(null)}
-            />
+            <Suspense
+              fallback={
+                <div className="p-12 text-center text-xs text-slate-500 dark:text-slate-400">
+                  Prüfungssimulator wird geladen...
+                </div>
+              }
+            >
+              <ExamSimulator
+                allQuestions={OFFICIAL_QUESTIONS}
+                selectedStateCode={prefs.selectedStateCode}
+                onFinishExam={recordExamSession}
+                bookmarkedIds={stats.bookmarkedIds}
+                onToggleBookmark={toggleBookmark}
+                speechRate={prefs.speechRate}
+                translationMode={prefs.translationMode}
+                customQuestionIds={customPracticeIds || undefined}
+                onClearCustomQuestions={() => setCustomPracticeIds(null)}
+              />
+            </Suspense>
           </div>
         )}
 
@@ -359,12 +396,20 @@ export default function App() {
               </p>
             </div>
 
-            <ThreeDVisualizer
-              onSelectState={handleSelectState}
-              selectedStateCode={prefs.selectedStateCode}
-              translationMode={prefs.translationMode}
-              speechRate={prefs.speechRate}
-            />
+            <Suspense
+              fallback={
+                <div className="p-12 text-center text-xs text-slate-500 dark:text-slate-400">
+                  3D-Modelle werden geladen...
+                </div>
+              }
+            >
+              <ThreeDVisualizer
+                onSelectState={handleSelectState}
+                selectedStateCode={prefs.selectedStateCode}
+                translationMode={prefs.translationMode}
+                speechRate={prefs.speechRate}
+              />
+            </Suspense>
           </div>
         )}
       </main>
@@ -407,27 +452,35 @@ export default function App() {
       </footer>
 
       {/* Modals */}
-      <GlossaryModal
-        isOpen={isGlossaryOpen}
-        onClose={() => setIsGlossaryOpen(false)}
-        speechRate={prefs.speechRate}
-        translationMode={prefs.translationMode}
-      />
+      <Suspense fallback={null}>
+        {isGlossaryOpen && (
+          <GlossaryModal
+            isOpen={isGlossaryOpen}
+            onClose={() => setIsGlossaryOpen(false)}
+            speechRate={prefs.speechRate}
+            translationMode={prefs.translationMode}
+          />
+        )}
 
-      <StatisticsModal
-        isOpen={isStatsOpen}
-        onClose={() => setIsStatsOpen(false)}
-        stats={stats}
-        totalQuestionsCount={OFFICIAL_QUESTIONS.length}
-        onResetProgress={resetAllProgress}
-      />
+        {isStatsOpen && (
+          <StatisticsModal
+            isOpen={isStatsOpen}
+            onClose={() => setIsStatsOpen(false)}
+            stats={stats}
+            totalQuestionsCount={OFFICIAL_QUESTIONS.length}
+            onResetProgress={resetAllProgress}
+          />
+        )}
 
-      <VoiceSettingsModal
-        isOpen={isVoiceModalOpen}
-        onClose={() => setIsVoiceModalOpen(false)}
-        speechRate={prefs.speechRate}
-        onChangeSpeechRate={rate => updatePrefs({ speechRate: rate })}
-      />
+        {isVoiceModalOpen && (
+          <VoiceSettingsModal
+            isOpen={isVoiceModalOpen}
+            onClose={() => setIsVoiceModalOpen(false)}
+            speechRate={prefs.speechRate}
+            onChangeSpeechRate={rate => updatePrefs({ speechRate: rate })}
+          />
+        )}
+      </Suspense>
 
       <StatePickerModal
         isOpen={isStatePickerOpen}

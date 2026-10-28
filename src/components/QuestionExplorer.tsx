@@ -10,6 +10,7 @@ import {
   X,
   ChevronsUpDown,
   PlayCircle,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export type FilterType =
@@ -18,6 +19,7 @@ export type FilterType =
   | 'geschichte'
   | 'gesellschaft'
   | 'bundesland'
+  | 'images'
   | 'bookmarked'
   | 'wrong';
 
@@ -65,6 +67,18 @@ export const QuestionExplorer: React.FC<QuestionExplorerProps> = ({
     return GERMAN_STATES.find(s => s.code === selectedStateCode) || GERMAN_STATES[0];
   }, [selectedStateCode]);
 
+  const imageQuestionIds = useMemo(() => {
+    return questions
+      .filter(
+        q =>
+          !!q.imageUrl &&
+          (q.category !== 'bundesland' ||
+            selectedStateCode === 'ALL' ||
+            q.stateCode === selectedStateCode)
+      )
+      .map(q => q.id);
+  }, [questions, selectedStateCode]);
+
   const filteredQuestions = useMemo(() => {
     return questions.filter(q => {
       if (filter === 'politik' && q.category !== 'politik') return false;
@@ -74,6 +88,17 @@ export const QuestionExplorer: React.FC<QuestionExplorerProps> = ({
       if (filter === 'bundesland') {
         if (q.category !== 'bundesland') return false;
         if (selectedStateCode !== 'ALL' && q.stateCode !== selectedStateCode) return false;
+      }
+
+      if (filter === 'images') {
+        if (!q.imageUrl) return false;
+        if (
+          q.category === 'bundesland' &&
+          selectedStateCode !== 'ALL' &&
+          q.stateCode !== selectedStateCode
+        ) {
+          return false;
+        }
       }
 
       if (filter === 'bookmarked' && !bookmarkedIds.includes(q.id)) return false;
@@ -220,6 +245,24 @@ export const QuestionExplorer: React.FC<QuestionExplorerProps> = ({
           <button
             type="button"
             role="tab"
+            aria-selected={filter === 'images'}
+            onClick={() => {
+              setFilter('images');
+              setActivePage(1);
+            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${
+              filter === 'images'
+                ? 'bg-slate-900 text-white dark:bg-amber-500 dark:text-slate-950 shadow-2xs'
+                : 'bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <ImageIcon className="w-3.5 h-3.5 text-amber-500 dark:text-current" />
+            <span>Bildfragen ({imageQuestionIds.length})</span>
+          </button>
+
+          <button
+            type="button"
+            role="tab"
             aria-selected={filter === 'bookmarked'}
             onClick={() => {
               setFilter('bookmarked');
@@ -311,6 +354,25 @@ export const QuestionExplorer: React.FC<QuestionExplorerProps> = ({
           >
             <PlayCircle className="w-3.5 h-3.5" />
             <span>Im Simulator üben</span>
+          </button>
+        </div>
+      )}
+
+      {filter === 'images' && imageQuestionIds.length > 0 && onPracticeCustomQuestions && (
+        <div className="p-3.5 rounded-2xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-800 dark:text-slate-200">
+          <div className="flex items-center gap-2">
+            <ImageIcon className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>
+              <strong>{imageQuestionIds.length} offizielle Bildfragen</strong> (Wappen, Karten, Stimmzettel & historische Fotos). Klicken Sie auf ein Bild zum Vergrößern.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => onPracticeCustomQuestions(imageQuestionIds)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-semibold transition"
+          >
+            <PlayCircle className="w-3.5 h-3.5" />
+            <span>Bildfragen im Simulator üben</span>
           </button>
         </div>
       )}

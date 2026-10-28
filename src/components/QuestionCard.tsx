@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Question, TranslationMode } from '../types';
 import { InteractiveWordText } from './InteractiveWordText';
 import { speechService } from '../services/speechService';
@@ -13,6 +13,7 @@ import {
   RotateCcw,
   ChevronDown,
   Image as ImageIcon,
+  ZoomIn,
 } from 'lucide-react';
 
 interface QuestionCardProps {
@@ -55,10 +56,26 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   isOpen = true,
   onToggleOpen,
 }) => {
+  const [isImageZoomed, setIsImageZoomed] = useState(false);
+
   const hasAnswered = !!selectedOptionId;
   const isCorrect = selectedOptionId === question.correctOptionId;
   const shouldReveal = (!isSimulatorMode && hasAnswered) || forceShowExplanation;
   const isExpanded = !isAccordion || isOpen;
+  const resolvedImageUrl = question.imageUrl
+    ? `${import.meta.env.BASE_URL}${question.imageUrl.replace(/^\//, '')}`
+    : undefined;
+
+  useEffect(() => {
+    if (!isImageZoomed) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsImageZoomed(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isImageZoomed]);
 
   const handleSpeakQuestion = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -241,16 +258,26 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       {/* Expandable Answer Options & Explanation */}
       {isExpanded && (
         <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-3 animate-in fade-in duration-150">
-          {/* Official BAMF Question Illustration */}
-          {question.imageUrl && (
-            <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 dark:border-slate-700 flex justify-center shadow-2xs">
+          {/* Official BAMF Question Illustration (Click to Zoom) */}
+          {resolvedImageUrl && (
+            <button
+              type="button"
+              onClick={() => setIsImageZoomed(true)}
+              className="group relative w-full p-3 sm:p-4 rounded-xl bg-white border border-slate-200 dark:border-slate-700 hover:border-amber-500 dark:hover:border-amber-500 flex justify-center shadow-2xs transition cursor-zoom-in focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-amber-500"
+              title="Klicken zum Vergrößern (Click to zoom)"
+              aria-label={`Abbildung zu Frage ${question.id} vergrößern`}
+            >
               <img
-                src={`${import.meta.env.BASE_URL}${question.imageUrl.replace(/^\//, '')}`}
+                src={resolvedImageUrl}
                 alt={`Offizielle Abbildung zu Frage ${question.id}`}
                 className="max-h-72 sm:max-h-80 w-auto object-contain rounded-lg"
                 loading="lazy"
               />
-            </div>
+              <span className="absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-900/75 text-white text-[11px] font-medium opacity-80 group-hover:opacity-100 transition-opacity">
+                <ZoomIn className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Vergrößern</span>
+              </span>
+            </button>
           )}
 
           {/* Multiple-Choice Options */}
@@ -451,6 +478,49 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Full-Screen Image Zoom Lightbox Modal */}
+      {isImageZoomed && resolvedImageUrl && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Vergrößerte Abbildung zu Frage ${question.id}`}
+          onClick={() => setIsImageZoomed(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-xs animate-in fade-in duration-150 cursor-zoom-out"
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            className="relative max-w-4xl w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-3 cursor-default"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-0.5">
+                <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
+                  Offizielle BAMF-Abbildung · Frage #{question.id}
+                </span>
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                  {question.question.de}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsImageZoomed(false)}
+                className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition"
+                aria-label="Vorschau schließen"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3 sm:p-6 rounded-xl bg-white border border-slate-200 flex justify-center overflow-auto max-h-[78vh]">
+              <img
+                src={resolvedImageUrl}
+                alt={`Offizielle Abbildung zu Frage ${question.id}`}
+                className="max-h-[72vh] w-auto object-contain"
+              />
+            </div>
+          </div>
         </div>
       )}
     </article>
