@@ -12,6 +12,7 @@ import {
   X,
   RotateCcw,
   ChevronDown,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 interface QuestionCardProps {
@@ -165,8 +166,8 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
             </div>
           )}
 
-          {/* Subtle Category Tag when expanded */}
-          {isExpanded && (
+          {/* Subtle Category Tag when expanded, or Image badge when collapsed */}
+          {isExpanded ? (
             <div className="pt-0.5 flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
               <span>
                 {CATEGORY_LABELS[question.category]}
@@ -174,7 +175,23 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               </span>
               <span>·</span>
               <span>Offizielle Frage #{question.id}</span>
+              {question.imageUrl && (
+                <>
+                  <span>·</span>
+                  <span className="inline-flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                    <ImageIcon className="w-3 h-3" />
+                    <span>Bildfrage</span>
+                  </span>
+                </>
+              )}
             </div>
+          ) : (
+            question.imageUrl && (
+              <div className="pt-0.5 flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium">
+                <ImageIcon className="w-3 h-3" />
+                <span>Mit offizieller Abbildung</span>
+              </div>
+            )
           )}
         </div>
 
@@ -224,6 +241,18 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
       {/* Expandable Answer Options & Explanation */}
       {isExpanded && (
         <div className="px-4 pb-4 sm:px-5 sm:pb-5 pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-3 animate-in fade-in duration-150">
+          {/* Official BAMF Question Illustration */}
+          {question.imageUrl && (
+            <div className="p-3 sm:p-4 rounded-xl bg-white border border-slate-200 dark:border-slate-700 flex justify-center shadow-2xs">
+              <img
+                src={`${import.meta.env.BASE_URL}${question.imageUrl.replace(/^\//, '')}`}
+                alt={`Offizielle Abbildung zu Frage ${question.id}`}
+                className="max-h-72 sm:max-h-80 w-auto object-contain rounded-lg"
+                loading="lazy"
+              />
+            </div>
+          )}
+
           {/* Multiple-Choice Options */}
           <div className="space-y-2" role="radiogroup" aria-label="Antwortmöglichkeiten">
             {question.options.map(option => {
